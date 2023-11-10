@@ -11,18 +11,18 @@ import java.util.regex.Pattern;
 
 public class JsonDeserializer {
 
-    private final String numberFormat = "(([-0-9.eE]+)|(null))";
-    private final String characterFormat = "(" +
+    private final String FORMAT_FOR_NUMBER = "(([-0-9.eE]+)|(null))";
+    private final String FORMAT_FOR_CHARACTER = "(" +
             "([0-9]{1,5})|" +
             "(\"\\\\[uU][0-9a-fA-F]{4}\")|" +
             "(\"?null\"?)|" +
             "(\"\\\\[bfnrt\"]\")|" +
             "(\".\")" +
             ")";
-    private final String stringFormat = "\"([^\"]*(\"{2})?[^\"]*)*\"";
+    private final String FORMAT_FOR_STRING = "\"([^\"]*(\"{2})?[^\"]*)*\"";
 
-    private final String booleanFormat = "(true|false)";
-    private final String arrayFormat = "(\\[{%d}).+?(]{%d})";
+    private final String FORMAT_FOR_BOOLEAN = "(true|false)";
+    private final String FORMAT_FOR_ARRAY = "(\\[{%d}).+?(]{%d})";
 
     public <T> T fromJson(Class<T> clazz, String json) throws JsonDeserializationException {
         try {
@@ -116,14 +116,14 @@ public class JsonDeserializer {
     private String getArray(String json) throws JsonDeserializationException {
         long brackets = json.chars().takeWhile(c -> c == '[').count();
         if (brackets < 1) throw new JsonDeserializationException("Brackets must be 1 or more");
-        String arrayFormat = String.format(this.arrayFormat, brackets, brackets);
+        String arrayFormat = String.format(this.FORMAT_FOR_ARRAY, brackets, brackets);
         Pattern arrrayPattern = Pattern.compile(arrayFormat);
         return getValue(arrrayPattern, json);
     }
 
     public String getBoolean(String json) throws JsonDeserializationException {
         if (json == null) throw new JsonDeserializationException("Must not be null");
-        Pattern charPattern = Pattern.compile(this.booleanFormat);
+        Pattern charPattern = Pattern.compile(this.FORMAT_FOR_BOOLEAN);
         return getValue(charPattern, json);
     }
 
@@ -139,19 +139,19 @@ public class JsonDeserializer {
 
     public String getCharValue(String json) throws JsonDeserializationException {
         if (json == null) throw new JsonDeserializationException("Must not be null");
-        Pattern charPattern = Pattern.compile(this.characterFormat);
+        Pattern charPattern = Pattern.compile(this.FORMAT_FOR_CHARACTER);
         return getValue(charPattern, json);
     }
 
     public String getStringValue(String json) throws JsonDeserializationException {
         if (json == null) throw new JsonDeserializationException("Must not be null");
-        Pattern stringPattern = Pattern.compile(this.stringFormat);
+        Pattern stringPattern = Pattern.compile(this.FORMAT_FOR_STRING);
         return getValue(stringPattern, json);
     }
 
     private String getNumber(String json) throws JsonDeserializationException {
         if (json == null) throw new JsonDeserializationException("Must not be null");
-        Pattern numberPattern = Pattern.compile(this.numberFormat);
+        Pattern numberPattern = Pattern.compile(this.FORMAT_FOR_NUMBER);
         return getValue(numberPattern, json);
     }
 
@@ -201,4 +201,5 @@ public class JsonDeserializer {
     private boolean isBoolean(char c) {
         return c == 't' || c == 'f';
     }
+
 }
